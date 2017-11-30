@@ -3652,11 +3652,22 @@ tzdb::current_zone() const
         if (lstat(timezone, &sb) == 0 && S_ISLNK(sb.st_mode) && sb.st_size > 0) {
             using namespace std;
             string result;
+#ifdef __APPLE__
+            //On MacOS we are already expanding the tz_dir with realpath. Therefore we need to expand here aswell.
+            char rp[PATH_MAX];
+            if (realpath(timezone, rp))
+                result = string(rp);
+            else
+                throw system_error(errno, system_category(), "realpath() failed");
+#else // __APPLE__
+            //We explicitly want to use readlink for at least Debian-like systems. When using realpath the path is
+            //otherwise expanded to invalid symlinks. e.g. US/Eastern is linked to ../posixrules
             char rp[PATH_MAX+1] = {};
             if (readlink(timezone, rp, sizeof(rp)-1) > 0)
                 result = string(rp);
             else
-                throw system_error(errno, system_category(), "realpath() failed");
+                throw system_error(errno, system_category(), "readlink() failed");
+#endif // __APPLE__
             const size_t pos = result.find(tz_dir);
             if (pos != result.npos)
                 result.erase(0, tz_dir.size() + 1 + pos);
