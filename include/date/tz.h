@@ -2381,15 +2381,6 @@ namespace clock_cast_detail
      return conv_clock<DestClock>(conv_clock<std::chrono::system_clock>(st));
    }
 
-   //conversion trought utc, 3rd candidate
-   template<typename DestClock, typename SourceClock, typename Duration>
-   auto cc_impl(const std::chrono::time_point<SourceClock, Duration>& st,
-                const void* /* 2nd */)
-     -> decltype(conv_clock<DestClock>(conv_clock<utc_clock>(st)))
-   {
-     return conv_clock<DestClock>(conv_clock<utc_clock>(st));
-   }
-
    //conversion trought sys and utc, 4th candidate
    template<typename DestClock, typename SourceClock, typename Duration>
    auto cc_impl(const std::chrono::time_point<SourceClock, Duration>& st,
@@ -2399,14 +2390,6 @@ namespace clock_cast_detail
      return conv_clock<DestClock>(conv_clock<utc_clock>(conv_clock<std::chrono::system_clock>(st)));
    }
 
-   //conversion trought utc and sys, 4th candidate
-   template<typename DestClock, typename SourceClock, typename Duration>
-   auto cc_impl(const std::chrono::time_point<SourceClock, Duration>& st,
-                ... /* 3rd */)
-     -> decltype(conv_clock<DestClock>(conv_clock<std::chrono::system_clock>(conv_clock<utc_clock>(st))))
-   {
-     return conv_clock<DestClock>(conv_clock<std::chrono::system_clock>(conv_clock<utc_clock>(st)));
-   }
 }
 
 template<typename DestClock, typename SourceClock, typename Duration>
